@@ -1,0 +1,14 @@
+[
+  {
+    "radar": "SHOWROOM Radar",
+    "display_name": "候補者名",
+    "source_url": "https://www.showroom-live.com/room/example",
+    "source_text": "アイドルオーディション参加、歌とダンス",
+    "showroom_url": "https://www.showroom-live.com/room/example",
+    "x_url": "https://x.com/example",
+    "instagram_url": "https://www.instagram.com/example/",
+    "instagram_status": "本人掲載リンク",
+    "evidence": ["SHOWROOM公開プロフィールに本人掲載SNSリンク"]
+  }
+]
+

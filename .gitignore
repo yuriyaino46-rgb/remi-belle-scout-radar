@@ -1,0 +1,15 @@
+.env
+.venv/
+.venv312/
+work/
+credentials/
+outputs/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+*.egg-info/
+data/*.db
+data/*.db-*
+reports/*.json
+service-account*.json
