@@ -6,7 +6,7 @@ from googleapiclient.discovery import build
 
 from .db import Database
 
-TABS = ["候補者マスター", "X Radar", "TikTok Radar", "SHOWROOM Radar", "対象外・保留", "実行ログ"]
+TABS = ["候補者マスター", "X Radar", "Instagram Radar", "TikTok Radar", "SHOWROOM Radar", "対象外・保留", "実行ログ"]
 CANDIDATE_HEADERS = [
     "DB ID", "表示名", "仮優先度", "スコア", "仮評価理由", "発見Radar", "発見日時",
     "本人投稿", "X URL", "Instagram ID", "Instagram URL", "Instagram確認状態",
@@ -33,6 +33,7 @@ class SheetsSync:
         values = {
             "候補者マスター": [CANDIDATE_HEADERS] + [self._candidate_row(r) for r in active],
             "X Radar": [CANDIDATE_HEADERS] + [self._candidate_row(r) for r in active if r["radar"] == "X Radar"],
+            "Instagram Radar": [CANDIDATE_HEADERS] + [self._candidate_row(r) for r in active if r["radar"] == "Instagram Radar"],
             "TikTok Radar": [CANDIDATE_HEADERS] + [self._candidate_row(r) for r in active if r["radar"] == "TikTok Radar"],
             "SHOWROOM Radar": [CANDIDATE_HEADERS] + [self._candidate_row(r) for r in active if r["radar"] == "SHOWROOM Radar"],
             "対象外・保留": [EXCLUDED_HEADERS] + [self._candidate_row(r) + [r["excluded_reason"], r["review_priority"]] for r in excluded],

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 class Radar(StrEnum):
     X = "X Radar"
+    INSTAGRAM = "Instagram Radar"
     TIKTOK = "TikTok Radar"
     SHOWROOM = "SHOWROOM Radar"
 
@@ -54,4 +55,3 @@ class RadarResult(BaseModel):
     s_count: int = 0
     errors: list[str] = Field(default_factory=list)
     unpersisted: list[str] = Field(default_factory=list)
-

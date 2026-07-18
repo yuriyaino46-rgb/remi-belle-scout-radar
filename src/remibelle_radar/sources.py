@@ -69,6 +69,86 @@ class XSource(Source):
         return output[:self.limit]
 
 
+class InstagramSource(Source):
+    """Official Instagram Graph API hashtag search for public recent media."""
+
+    radar = Radar.INSTAGRAM
+
+    def __init__(
+        self,
+        access_token: str | None,
+        instagram_user_id: str | None,
+        api_version: str,
+        hashtags: list[str],
+        timeout: float,
+        timezone: str,
+        limit: int,
+    ):
+        self.access_token = access_token
+        self.instagram_user_id = instagram_user_id
+        self.api_version = api_version
+        self.hashtags = hashtags
+        self.timeout = timeout
+        self.timezone = ZoneInfo(timezone)
+        self.limit = min(limit, 50)
+
+    def discover(self) -> list[CandidateInput]:
+        if not self.access_token or not self.instagram_user_id or not self.hashtags:
+            return []
+
+        output: list[CandidateInput] = []
+        seen_media: set[str] = set()
+        per_hashtag = max(1, math.ceil(self.limit / len(self.hashtags)))
+        base_url = f"https://graph.facebook.com/{self.api_version}"
+        common = {
+            "user_id": self.instagram_user_id,
+            "access_token": self.access_token,
+        }
+        with httpx.Client(timeout=self.timeout) as client:
+            for hashtag in self.hashtags:
+                if len(output) >= self.limit:
+                    break
+                search = client.get(
+                    f"{base_url}/ig_hashtag_search",
+                    params={**common, "q": hashtag},
+                )
+                search.raise_for_status()
+                matches = search.json().get("data", [])
+                if not matches:
+                    continue
+                media_response = client.get(
+                    f"{base_url}/{matches[0]['id']}/recent_media",
+                    params={
+                        **common,
+                        "fields": "id,caption,media_type,permalink,timestamp,username",
+                        "limit": per_hashtag,
+                    },
+                )
+                media_response.raise_for_status()
+                for media in media_response.json().get("data", []):
+                    media_id = str(media.get("id") or "")
+                    permalink = media.get("permalink")
+                    if not media_id or not permalink or media_id in seen_media:
+                        continue
+                    seen_media.add(media_id)
+                    username = media.get("username")
+                    instagram_url = f"https://www.instagram.com/{username}/" if username else None
+                    output.append(CandidateInput(
+                        display_name=username or f"Instagram投稿 {media_id}",
+                        radar=self.radar,
+                        source_url=permalink,
+                        source_text=media.get("caption") or "",
+                        source_is_self_post=True,
+                        instagram_url=instagram_url,
+                        instagram_status="本人投稿から取得" if username else "投稿者未確認",
+                        evidence=[f"Instagram公開ハッシュタグ #{hashtag}", permalink],
+                        discovered_at=datetime.now(self.timezone),
+                    ))
+                    if len(output) >= self.limit:
+                        break
+        return output
+
+
 class SeedSource(Source):
     """Public-profile seeds for TikTok/SHOWROOM reverse lookup and reproducible dry runs."""
 

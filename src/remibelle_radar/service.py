@@ -9,7 +9,7 @@ from .config import Settings
 from .db import Database
 from .models import Priority, Radar, RadarResult
 from .sheets import SheetsSync
-from .sources import SeedSource, Source, XSource
+from .sources import InstagramSource, SeedSource, Source, XSource
 
 
 class RadarService:
@@ -23,6 +23,15 @@ class RadarService:
         return [
             XSource(
                 s.x_bearer_token if s.enable_paid_x_api else None,
+                s.request_timeout_seconds,
+                s.radar_timezone,
+                s.max_results_per_radar,
+            ),
+            InstagramSource(
+                s.instagram_access_token,
+                s.instagram_user_id,
+                s.instagram_graph_api_version,
+                [tag.strip().lstrip("#") for tag in s.instagram_hashtags.split(",") if tag.strip()],
                 s.request_timeout_seconds,
                 s.radar_timezone,
                 s.max_results_per_radar,
