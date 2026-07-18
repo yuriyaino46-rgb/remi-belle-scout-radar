@@ -21,7 +21,12 @@ class RadarService:
     def sources(self) -> list[Source]:
         s = self.settings
         return [
-            XSource(s.x_bearer_token, s.request_timeout_seconds, s.radar_timezone, s.max_results_per_radar),
+            XSource(
+                s.x_bearer_token if s.enable_paid_x_api else None,
+                s.request_timeout_seconds,
+                s.radar_timezone,
+                s.max_results_per_radar,
+            ),
             SeedSource(Radar.TIKTOK, s.public_profile_seeds, s.radar_timezone),
             SeedSource(Radar.SHOWROOM, s.public_profile_seeds, s.radar_timezone),
         ]

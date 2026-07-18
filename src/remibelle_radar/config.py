@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     google_spreadsheet_id: str | None = None
     google_service_account_json: Path | None = None
     x_bearer_token: str | None = None
+    enable_paid_x_api: bool = False
     radar_timezone: str = "Asia/Tokyo"
     public_profile_seeds: Path = Path("seeds/public_profiles.json")
     request_timeout_seconds: float = 20
@@ -22,4 +23,3 @@ class Settings(BaseSettings):
     def valid_timezone(cls, value: str) -> str:
         ZoneInfo(value)
         return value
-
