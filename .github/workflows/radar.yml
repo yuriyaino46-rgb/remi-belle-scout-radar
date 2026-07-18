@@ -1,0 +1,55 @@
+name: Remi Belle Scout Radar
+
+on:
+  schedule:
+    - cron: "0 3,8,11 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: remibelle-radar
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install .
+      - name: Restore SQLite snapshot
+        uses: actions/cache/restore@v4
+        with:
+          path: data/remibelle.db
+          key: radar-db-${{ github.run_id }}
+          restore-keys: radar-db-
+      - name: Write Google credentials
+        env:
+          SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/remibelle"
+          printenv SERVICE_ACCOUNT_JSON > "$RUNNER_TEMP/remibelle/google.json"
+      - name: Run radar
+        env:
+          DATABASE_PATH: data/remibelle.db
+          X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
+          GOOGLE_SPREADSHEET_ID: ${{ secrets.GOOGLE_SPREADSHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ runner.temp }}/remibelle/google.json
+          PUBLIC_PROFILE_SEEDS: seeds/public_profiles.json
+        run: remibelle-radar run
+      - name: Save SQLite snapshot
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/remibelle.db
+          key: radar-db-${{ github.run_id }}
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-report-${{ github.run_id }}
+          path: reports/
