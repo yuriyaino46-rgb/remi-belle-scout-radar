@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     enable_paid_x_api: bool = False
     instagram_access_token: str | None = None
     instagram_user_id: str | None = None
-    instagram_graph_api_version: str = "v23.0"
+    instagram_graph_api_version: str = "v25.0"
     instagram_hashtags: str = "アイドル志望,アイドルオーディション,元アイドル,被写体,コンカフェ"
     radar_timezone: str = "Asia/Tokyo"
     public_profile_seeds: Path = Path("seeds/public_profiles.json")

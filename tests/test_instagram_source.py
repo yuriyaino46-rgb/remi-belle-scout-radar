@@ -38,7 +38,7 @@ class _Client:
 
 def _source(token="token", user_id="user-id"):
     return InstagramSource(
-        token, user_id, "v23.0", ["アイドル志望"], 10, "Asia/Tokyo", 30
+        token, user_id, "v25.0", ["アイドル志望"], 10, "Asia/Tokyo", 30
     )
 
 
@@ -55,4 +55,3 @@ def test_instagram_source_maps_public_hashtag_media(monkeypatch):
     assert candidates[0].radar == Radar.INSTAGRAM
     assert candidates[0].instagram_url == "https://www.instagram.com/candidate_name/"
     assert candidates[0].instagram_status == "本人投稿から取得"
-
