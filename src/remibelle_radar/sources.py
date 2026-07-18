@@ -1,4 +1,5 @@
 import json
+import math
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
@@ -36,11 +37,14 @@ class XSource(Source):
             return []
         output: list[CandidateInput] = []
         headers = {"Authorization": f"Bearer {self.token}"}
+        per_query_limit = max(10, min(math.ceil(self.limit / len(X_QUERIES)), 100))
         with httpx.Client(timeout=self.timeout, headers=headers) as client:
             for query in X_QUERIES:
+                if len(output) >= self.limit:
+                    break
                 response = client.get(
                     "https://api.x.com/2/tweets/search/recent",
-                    params={"query": query, "max_results": max(10, min(self.limit, 100)),
+                    params={"query": query, "max_results": per_query_limit,
                             "tweet.fields": "created_at,author_id,referenced_tweets",
                             "expansions": "author_id", "user.fields": "name,username,description,url"},
                 )
@@ -60,7 +64,9 @@ class XSource(Source):
                         other_profile_url=user.get("url"), evidence=[user.get("description", "")],
                         discovered_at=datetime.now(self.timezone),
                     ))
-        return output
+                    if len(output) >= self.limit:
+                        break
+        return output[:self.limit]
 
 
 class SeedSource(Source):
@@ -78,4 +84,3 @@ class SeedSource(Source):
         now = datetime.now(self.timezone)
         return [CandidateInput.model_validate({**r, "radar": self.radar, "discovered_at": now})
                 for r in records if r.get("radar") == self.radar.value]
-
